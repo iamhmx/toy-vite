@@ -2,7 +2,7 @@
 
 ### 概念
 
-`Vite`，一个基于浏览器原生 `ES Module imports` 的**开发服务器**
+`Vite`，一个基于浏览器原生 `ES Module imports` 的 `Web` 开发构建工具
 
 ### 原理
 
