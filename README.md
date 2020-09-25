@@ -10,8 +10,8 @@
 
 ```html
 <body>
-	<div id="app"></div>
-	<script type="module" src="/src/main.js"></script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
 </body>
 ```
 
@@ -38,35 +38,35 @@ const router = new Router()
 
 // 返回index.html
 router.get('/', async (ctx, next) => {
-	let content = fs.readFileSync('./index.html', 'utf-8')
-	ctx.type = 'text/html'
-	ctx.body = content
+  let content = fs.readFileSync('./index.html', 'utf-8')
+  ctx.type = 'text/html'
+  ctx.body = content
 })
 
 app.use(router.routes())
 
 app.listen(4000, () => {
-	console.log('toy-vite server listen at 4000')
+  console.log('toy-vite server listen at 4000')
 })
 ```
 
-访问：http://localhost:4000，找不到请求
+访问：http://localhost:4000
 
 <img src="https://relearnvue.com/static/toy-vite1.png">
 
-需要在服务端添加请求处理
+找不到请求，需要在服务端添加请求处理
 
 ```js
 // index.html中，会通过ES Module引入main.js（<script type="module" src="/src/main.js"></script>）
 // ESM会发起http请求，去获取需要引入的模块
 router.get(/\.js$/, async (ctx, next) => {
-	const {
-		request: { url },
-	} = ctx
-	// 此处是读取main.js，并返回
-	let content = fs.readFileSync(path.resolve(__dirname, url.slice(1)), 'utf-8')
-	ctx.type = 'application/javascript'
-	ctx.body = content // rewriteImport(content)
+  const {
+    request: { url },
+  } = ctx
+  // 此处是读取main.js，并返回
+  let content = fs.readFileSync(path.resolve(__dirname, url.slice(1)), 'utf-8')
+  ctx.type = 'application/javascript'
+  ctx.body = content // rewriteImport(content)
 })
 ```
 
@@ -94,13 +94,13 @@ import { createApp } from '/@modules/vue'
 // Relative references must start with either "/", "./", or "../".
 // 将 from 'vue' 转成 from '/@modules/vue'
 function rewriteImport(content) {
-	return content.replace(/ from ['|"]([^'"]+)['|"]/g, function (s0, s1) {
-		if (s1[0] !== '.' && s1[1] !== '/') {
-			return ` from '/@modules/${s1}'`
-		} else {
-			return s0
-		}
-	})
+  return content.replace(/ from ['|"]([^'"]+)['|"]/g, function (s0, s1) {
+    if (s1[0] !== '.' && s1[1] !== '/') {
+      return ` from '/@modules/${s1}'`
+    } else {
+      return s0
+    }
+  })
 }
 ```
 
@@ -119,18 +119,18 @@ function rewriteImport(content) {
 ```js
 // /@modules的请求，会去node_modules里面查找模块
 router.get(/^\/@modules/, async (ctx, next) => {
-	const {
-		request: { url },
-	} = ctx
-	// 模块：xxx/toy-vite/node_modules/vue
-	const modulePath = path.resolve(__dirname, 'node_modules', url.replace('/@modules/', ''))
-	// 模块文件位置，package文件中的module字段：dist/vue.runtime.esm-bundler.js
-	const module = require(`${modulePath}/package.json`).module
-	// 模块最终位置
-	const moduleFilePath = path.resolve(modulePath, module)
-	const content = fs.readFileSync(moduleFilePath, 'utf-8')
-	ctx.type = 'application/javascript'
-	ctx.body = rewriteImport(content)
+  const {
+    request: { url },
+  } = ctx
+  // 模块：xxx/toy-vite/node_modules/vue
+  const modulePath = path.resolve(__dirname, 'node_modules', url.replace('/@modules/', ''))
+  // 模块文件位置，package文件中的module字段：dist/vue.runtime.esm-bundler.js
+  const module = require(`${modulePath}/package.json`).module
+  // 模块最终位置
+  const moduleFilePath = path.resolve(modulePath, module)
+  const content = fs.readFileSync(moduleFilePath, 'utf-8')
+  ctx.type = 'application/javascript'
+  ctx.body = rewriteImport(content)
 })
 ```
 
@@ -139,29 +139,29 @@ router.get(/^\/@modules/, async (ctx, next) => {
 ```js
 // 单文件组件解析，处理：import xx from 'xx.vue'
 router.get(/\.vue$/, async (ctx, next) => {
-	const {
-		request: { url, query },
-	} = ctx
-	const vueFilePath = path.resolve(__dirname, url.split('?')[0].slice(1))
-	// 使用官方库@vue/compiler-sfc解析
-	const { descriptor } = compilerSfc.parse(fs.readFileSync(vueFilePath, 'utf-8'))
-	console.log('content：', descriptor.script.content)
-	if (!query.type) {
-		// 处理js内容
-		ctx.type = 'application/javascript'
-		ctx.body = `
+  const {
+    request: { url, query },
+  } = ctx
+  const vueFilePath = path.resolve(__dirname, url.split('?')[0].slice(1))
+  // 使用官方库@vue/compiler-sfc解析
+  const { descriptor } = compilerSfc.parse(fs.readFileSync(vueFilePath, 'utf-8'))
+  console.log('content：', descriptor.script.content)
+  if (!query.type) {
+    // 处理js内容
+    ctx.type = 'application/javascript'
+    ctx.body = `
 ${rewriteImport(descriptor.script.content.replace('export default ', 'const __script = '))}
 import {render as __render} from "${url}?type=template"
 __script.render = __render
 export default __script
-		`
-	} else if (query.type === 'template') {
-		// 解析template，生成render函数
-		const template = descriptor.template
-		const render = compilerDom.compile(template.content, { mode: 'module' }).code
-		ctx.type = 'application/javascript'
-		ctx.body = rewriteImport(render)
-	}
+    `
+  } else if (query.type === 'template') {
+    // 解析template，生成render函数
+    const template = descriptor.template
+    const render = compilerDom.compile(template.content, { mode: 'module' }).code
+    ctx.type = 'application/javascript'
+    ctx.body = rewriteImport(render)
+  }
 })
 ```
 
@@ -170,13 +170,13 @@ export default __script
 ```js
 // 处理css请求
 router.get(/css$/, async (ctx, next) => {
-	const {
-		request: { url },
-	} = ctx
-	const p = path.resolve(__dirname, url.slice(1))
-	const file = fs.readFileSync(p, 'utf-8')
-	const content = `
-			// import {updateStyle} from '/vite/client'
+  const {
+    request: { url },
+  } = ctx
+  const p = path.resolve(__dirname, url.slice(1))
+  const file = fs.readFileSync(p, 'utf-8')
+  const content = `
+      // import {updateStyle} from '/vite/client'
       const css = "${file.replace(/\n/g, '')}"
       const link = document.createElement('style')
       link.setAttribute('type', 'text/css')
@@ -184,8 +184,8 @@ router.get(/css$/, async (ctx, next) => {
       link.innerHTML = css
       export default css
     `
-	ctx.type = 'application/javascript'
-	ctx.body = content
+  ctx.type = 'application/javascript'
+  ctx.body = content
 })
 ```
 
