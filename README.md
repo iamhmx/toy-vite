@@ -1,4 +1,4 @@
-<img src="https://relearnvue.com/static/toy-vite.png" alt="toy-vite">
+<img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-aliyun-eewtwzjb1bxvad91bd/c58adcc0-2267-11eb-81ea-f115fe74321c.png" alt="toy-vite">
 
 ### 概念
 
@@ -52,7 +52,7 @@ app.listen(4000, () => {
 
 访问：http://localhost:4000
 
-<img src="https://relearnvue.com/static/toy-vite1.png">
+<img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-aliyun-eewtwzjb1bxvad91bd/c66b78c0-2267-11eb-8a36-ebb87efcf8c0.png">
 
 找不到请求，需要在服务端添加请求处理
 
@@ -72,7 +72,7 @@ router.get(/\.js$/, async (ctx, next) => {
 
 再次请求
 
-<img src="https://relearnvue.com/static/toy-vite2.png">
+<img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-aliyun-eewtwzjb1bxvad91bd/c74cd810-2267-11eb-899d-733ae62bed2f.png">
 
 错误的原因是因为在 `main.js` 中，引入了 `vue`
 
@@ -106,7 +106,7 @@ function rewriteImport(content) {
 
 转换后，再次请求，依旧报错
 
-<img src="https://relearnvue.com/static/toy-vite3.png">
+<img src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-aliyun-eewtwzjb1bxvad91bd/c808ae00-2267-11eb-899d-733ae62bed2f.png">
 
 现在需要处理 3 种类型的请求：
 
